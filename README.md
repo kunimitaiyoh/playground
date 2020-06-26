@@ -1,1 +1,2 @@
-# playground-web
+# playground
+Playground for Web.
