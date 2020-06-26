@@ -11,14 +11,14 @@ app.get("/", (req, res) => {
 app.get("/messages", (req, res) => {
     console.log({ event: "MESSAGES_START" });
 
-    req.socket.setTimeout(30 * 1000);
     res.writeHead(200, {
         "Content-Type": "text/event-stream",
         Connection: "keep-alive",
     });
 
     const listener = (value: number) => res.write(`data: ${JSON.stringify(value)}\n\n`);
-    emitter.addListener(listener)
+    emitter.addListener(listener);
+
     res.on("close", () => {
         console.log({ event: "CLOSE" });
         emitter.removeListener(listener);
