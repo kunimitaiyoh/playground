@@ -1,0 +1,29 @@
+{
+  "name": "playground-server",
+  "version": "0.0.0",
+  "description": "",
+  "main": "dist/main.js",
+  "scripts": {
+    "up": "npm run build && npm run start",
+    "build": "tsc",
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunimitaiyoh/playground.git"
+  },
+  "author": "KUNIMI Taiyoh",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kunimitaiyoh/playground/issues"
+  },
+  "homepage": "https://github.com/kunimitaiyoh/playground#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.6",
+    "typescript": "^3.9.5"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
