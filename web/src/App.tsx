@@ -1,3 +1,4 @@
+import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
 import "./App.css";
 import {
@@ -15,7 +16,7 @@ function App() {
         <Route path="/" exact>
           <Home />
         </Route>
-        <Route path="/room/:roomId/:username/:server" exact>
+        <Route path="/room/:roomId/:username" exact>
           <Room />
         </Route>
       </Switch>
