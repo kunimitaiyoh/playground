@@ -1,12 +1,11 @@
-export class RandomIntEmitter {
-    listeners: Set<(value: number) => void>;
+export class MessageEmitter {
+    listeners: Set<UserMessageListener>;
 
     constructor() {
         this.listeners = new Set();
-        this.emit();
     }
 
-    addListener(listener: (value: number) => void): boolean {
+    addListener(listener: UserMessageListener): boolean {
         if (this.listeners.has(listener)) {
             return false;
         } else {
@@ -15,7 +14,7 @@ export class RandomIntEmitter {
         }
     }
 
-    removeListener(listener: (value: number) => void): boolean {
+    removeListener(listener: UserMessageListener): boolean {
         if (this.listeners.has(listener)) {
             this.listeners.delete(listener);
             return true;
@@ -24,12 +23,10 @@ export class RandomIntEmitter {
         }
     }
 
-    emit(): void {
-        const value = Math.floor(Math.random() * 10000);
-        console.log({ event: "EMITTING_VALUE", data: { value, listeners: this.listeners.size } });
-        this.listeners.forEach(listener => listener(value));
-
-        const durationMs = Math.random() * 3000 + 100;
-        setTimeout(() => this.emit(), durationMs);
+    emit(event: UserMessage): void {
+        console.log({ event: "EMITTING_VALUE", data: { event, listeners: this.listeners.size } });
+        this.listeners.forEach(listener => listener(event));
     }
 }
+
+export type UserMessageListener = (event: UserMessage) => void;
