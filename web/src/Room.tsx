@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
+
+const SERVER_HOST = "//localhost:8080";
 
 export function Room() {
   const params: Params = useParams();
@@ -9,28 +11,49 @@ export function Room() {
   const roomId = decodeURIComponent(params.roomId);
   const username = decodeURIComponent(params.username);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    doSubmit();
+  useEffect(() => {
+    const eventSource = new EventSource(`${SERVER_HOST}/messages`);
+    eventSource.onmessage = (event) => handleMessageReceive(JSON.parse(event.data));
+    return () => {
+      eventSource.close();
+    };
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    await doSubmit();
   }
 
-  function handleKeySubmit(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  async function handleKeySubmit(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.keyCode !== 13 || !(e.ctrlKey || e.metaKey))
       return
 
-    doSubmit();
     e.preventDefault();
+    await doSubmit();
   }
 
-  function doSubmit() {
+  async function doSubmit(): Promise<void> {
     setState(state => ({
       ...state,
       text: "",
-      messages: state.messages.concat({
+    }))
+    await fetch(`${SERVER_HOST}/messages`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        roomId,
         username,
         body: state.text,
-        created: new Date().toISOString(),
       }),
+    });
+  }
+
+  function handleMessageReceive(event: Message): void {
+    setState(state => ({
+      ...state,
+      messages: state.messages.concat(event),
     }));
   }
 
