@@ -3,13 +3,17 @@ import express from "express";
 import Redis from "ioredis";
 
 import { MessagePublisher, UserMessageListener } from "./publisher";
-import { allowOrigin } from "./util";
+import { allowOrigin, log } from "./util";
+
+const REDIS_HOST = process.env["REDIS_HOST"]
+if (!REDIS_HOST)
+    process.exit(1);
 
 const app = express();
 app.use(json());
 app.use(allowOrigin);
 
-const publisher = MessagePublisher.start(new Redis(), new Redis());
+const publisher = MessagePublisher.start(new Redis({ host: REDIS_HOST }), new Redis({ host: REDIS_HOST }));
 
 app.get("/", (req, res) => {
     res.send("Hello, world!");
@@ -18,7 +22,7 @@ app.get("/", (req, res) => {
 app.get("/messages/:roomId", (req, res) => {
     const { roomId } = req.params as { roomId: string };
 
-    console.log({ event: "MESSAGES_START", data: { roomId } });
+    log("MESSAGES_START", { roomId });
 
     res.writeHead(200, {
         "Content-Type": "text/event-stream; charset=utf-8",
@@ -30,7 +34,7 @@ app.get("/messages/:roomId", (req, res) => {
     publisher.addListener(roomId, listener);
 
     res.on("close", () => {
-        console.log({ event: "CLOSE" });
+        log("CLOSE", null);
         publisher.removeListener(roomId, listener);
     });
 });
@@ -39,7 +43,7 @@ app.post("/messages/:roomId", async (req, res) => {
     const { roomId } = req.params as { roomId: string };
     const body: UserMessageRequest = { roomId, ...req.body };
 
-    console.log({ event: "MESSAGE_POST", body });
+    log("MESSAGE_POST", { body });
     await publisher.publish({ ...body, created: new Date().toISOString() });
     res.status(200).end();
 });
