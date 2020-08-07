@@ -1,7 +1,7 @@
 {
   "name": "playground-server",
   "version": "0.0.0",
-  "description": "",
+  "private": true,
   "main": "dist/main.js",
   "scripts": {
     "up": "npm run build && npm run start",

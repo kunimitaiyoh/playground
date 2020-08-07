@@ -1,5 +1,12 @@
 version: "3"
 services:
+  elemental:
+    build:
+      context: .
+    environment:
+      REDIS_HOST: redis
+    ports:
+      - 8080:8080
   redis:
     image: redis:6.0.6-alpine
     ports:

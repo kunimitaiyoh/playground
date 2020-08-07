@@ -1,4 +1,5 @@
 import { Redis } from "ioredis";
+import { log } from "./util";
 
 export class MessagePublisher {
     deliveries: Map<string, UserMessageListener[]>;
@@ -9,7 +10,7 @@ export class MessagePublisher {
 
     async addListener(roomId: string, listener: UserMessageListener): Promise<boolean> {
         if (!this.deliveries.has(roomId)) {
-            console.log({ event: "POPULATE_DELIVERY", data: { roomId } })
+            log("POPULATE_DELIVERY", { roomId });
             this.deliveries.set(roomId, []);
         }
 
@@ -30,7 +31,8 @@ export class MessagePublisher {
             this.deliveries.set(roomId, edited);
             return true;
         } else {
-            console.log({ event: "DELETE_DELIVERY", data: { roomId } })
+            log("DELETE_DELIVERY", { roomId });
+
             this.deliveries.delete(roomId);
             return true;
         }
@@ -38,19 +40,19 @@ export class MessagePublisher {
 
     publish(event: UserMessage): Promise<void> {
         return this.publisher.publish(`room`, JSON.stringify(event))
-            .then(clients => console.log({ event: "PUBLISH_MESSAGE", data: { event, listeners: this.deliveries.size, clients } }))
+            .then(clients => log("PUBLISH_MESSAGE", { event, listeners: this.deliveries.size, clients }));
     }
 
     protected subscribe(): Promise<void> {
         this.subscriber.on("message", this.handleMessage.bind(this));
         return this.subscriber.subscribe("room")
-            .then(count => console.log({ event: "SUBSCRIBE_MESSAGES", data: { count } }));
+            .then(count => log("SUBSCRIBE_MESSAGES", { count }));
     }
 
     protected unsubscribe(): Promise<void> {
         this.subscriber.removeListener("message", this.handleMessage.bind(this));
         return this.subscriber.unsubscribe("room")
-            .then(count => console.log({ event: "UNSUBSCRIBE_MESSAGES", data: { count } }));
+            .then(count => log("UNSUBSCRIBE_MESSAGES", { count }));
     }
 
     protected handleMessage(channel: string, message: string): void {
@@ -58,13 +60,13 @@ export class MessagePublisher {
             return;
 
         const event = JSON.parse(message) as UserMessage;
-        console.log({ event: "RECEIVE_MESSAGE", data: { channel, message: event } });
+        log("RECEIVE_MESSAGE", { channel, message: event });
 
         const listeners = this.deliveries.get(event.roomId);
         if (listeners) {
             listeners.forEach(listener => listener(event));
         } else {
-            console.error({ event: "NO_DELIVERY_FOUND", data: { channel, message } });
+            log("NO_DELIVERY_FOUND", { channel, message });
         }
     }
 
