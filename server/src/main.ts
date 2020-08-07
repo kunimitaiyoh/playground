@@ -34,7 +34,7 @@ app.get("/messages/:roomId", (req, res) => {
     publisher.addListener(roomId, listener);
 
     res.on("close", () => {
-        log("CLOSE", null);
+        log("CLOSE", { roomId });
         publisher.removeListener(roomId, listener);
     });
 });
