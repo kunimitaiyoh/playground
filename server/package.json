@@ -21,9 +21,11 @@
   "homepage": "https://github.com/kunimitaiyoh/playground#readme",
   "devDependencies": {
     "@types/express": "^4.17.6",
+    "@types/ioredis": "^4.17.3",
     "typescript": "^3.9.5"
   },
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "ioredis": "^4.17.3"
   }
 }

@@ -12,7 +12,7 @@ export function Room() {
   const username = decodeURIComponent(params.username);
 
   useEffect(() => {
-    const eventSource = new EventSource(`${SERVER_HOST}/messages`);
+    const eventSource = new EventSource(`${SERVER_HOST}/messages/${roomId}`);
     eventSource.onmessage = (event) => handleMessageReceive(JSON.parse(event.data));
     return () => {
       eventSource.close();
@@ -37,13 +37,12 @@ export function Room() {
       ...state,
       text: "",
     }))
-    await fetch(`${SERVER_HOST}/messages`, {
+    await fetch(`${SERVER_HOST}/messages/${roomId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        roomId,
         username,
         body: state.text,
       }),
