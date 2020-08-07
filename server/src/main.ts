@@ -1,21 +1,24 @@
 import { json } from "body-parser";
 import express from "express";
+import Redis from "ioredis";
 
-import { MessageEmitter, UserMessageListener } from "./emitter";
+import { MessagePublisher, UserMessageListener } from "./publisher";
 import { allowOrigin } from "./util";
 
 const app = express();
 app.use(json());
 app.use(allowOrigin);
 
-const emitter = new MessageEmitter();
+const publisher = MessagePublisher.start(new Redis(), new Redis());
 
 app.get("/", (req, res) => {
     res.send("Hello, world!");
 });
 
-app.get("/messages", (req, res) => {
-    console.log({ event: "MESSAGES_START" });
+app.get("/messages/:roomId", (req, res) => {
+    const { roomId } = req.params as { roomId: string };
+
+    console.log({ event: "MESSAGES_START", data: { roomId } });
 
     res.writeHead(200, {
         "Content-Type": "text/event-stream; charset=utf-8",
@@ -24,18 +27,20 @@ app.get("/messages", (req, res) => {
     res.flushHeaders();
 
     const listener: UserMessageListener = (event) => res.write(`data: ${JSON.stringify(event)}\n\n`);
-    emitter.addListener(listener);
+    publisher.addListener(roomId, listener);
 
     res.on("close", () => {
         console.log({ event: "CLOSE" });
-        emitter.removeListener(listener);
+        publisher.removeListener(roomId, listener);
     });
 });
 
-app.post("/messages", (req, res) => {
-    const body: UserMessageRequest = req.body
+app.post("/messages/:roomId", async (req, res) => {
+    const { roomId } = req.params as { roomId: string };
+    const body: UserMessageRequest = { roomId, ...req.body };
+
     console.log({ event: "MESSAGE_POST", body });
-    emitter.emit({ ...body, created: new Date().toISOString() });
+    await publisher.publish({ ...body, created: new Date().toISOString() });
     res.status(200).end();
 });
 
