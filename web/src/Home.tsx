@@ -3,11 +3,11 @@ import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 
 export function Home() {
-  const [state, setState] = useState({ name: "", roomId: "" });
+  const [state, setState] = useState({ server: "elemental", name: "", roomId: "" });
   const history = useHistory();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    history.push(`/room/${encodeURIComponent(state.roomId)}/${encodeURIComponent(state.name)}`);
+    history.push(`/room/${encodeURIComponent(state.server)}/${encodeURIComponent(state.roomId)}/${encodeURIComponent(state.name)}`);
     e.preventDefault();
   }
 
@@ -17,6 +17,16 @@ export function Home() {
         <Col>
           <h1>Home</h1>
           <Form onSubmit={ handleSubmit }>
+            <Form.Group as={ Row } controlId="formPlaintextServer">
+              <Form.Label column sm="2">サーバー</Form.Label>
+              <Col sm="4">
+              <Form.Control name="server" required as="select" value={ state.server } onChange={ e => setState({ ...state, server: e.target.value }) }>
+                <option value="elemental">Elemental</option>
+                <option value="gaia">Gaia</option>
+                <option value="mana">Mana</option>
+              </Form.Control>
+              </Col>
+            </Form.Group>
             <Form.Group as={ Row } controlId="formPlaintextName">
               <Form.Label column sm="2">名前</Form.Label>
               <Col sm="4">

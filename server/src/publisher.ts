@@ -40,7 +40,7 @@ export class MessagePublisher {
 
     publish(event: UserMessage): Promise<void> {
         return this.publisher.publish(`room`, JSON.stringify(event))
-            .then(clients => log("PUBLISH_MESSAGE", { event, listeners: this.deliveries.size, clients }));
+            .then(clients => log("DELIVER_MESSAGE", { event, listeners: this.deliveries.size, clients }));
     }
 
     protected subscribe(): Promise<void> {

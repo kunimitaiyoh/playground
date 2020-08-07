@@ -12,4 +12,4 @@ RUN npm install
 COPY server .
 RUN npm run build
 
-CMD ["npm", "run", "start"]
+CMD ["node", "."]

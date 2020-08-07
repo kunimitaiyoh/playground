@@ -7,6 +7,20 @@ services:
       REDIS_HOST: redis
     ports:
       - 8080:8080
+  gaia:
+    build:
+      context: .
+    environment:
+      REDIS_HOST: redis
+    ports:
+      - 9080:8080
+  mana:
+    build:
+      context: .
+    environment:
+      REDIS_HOST: redis
+    ports:
+      - 10080:8080
   redis:
     image: redis:6.0.6-alpine
     ports:

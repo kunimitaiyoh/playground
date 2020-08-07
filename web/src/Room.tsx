@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 
-const SERVER_HOST = "//localhost:8080";
-
 export function Room() {
   const params: Params = useParams();
   const [state, setState] = useState<State>({ text: "", messages: [] });
 
+  const server = decodeURIComponent(params.server);
   const roomId = decodeURIComponent(params.roomId);
   const username = decodeURIComponent(params.username);
 
+  const host = `//localhost:${resolveServerPort(server)}`;
+
   useEffect(() => {
-    const eventSource = new EventSource(`${SERVER_HOST}/messages/${roomId}`);
+    const eventSource = new EventSource(`${host}/messages/${roomId}`);
     eventSource.onmessage = (event) => handleMessageReceive(JSON.parse(event.data));
     return () => {
       eventSource.close();
@@ -37,7 +38,7 @@ export function Room() {
       ...state,
       text: "",
     }))
-    await fetch(`${SERVER_HOST}/messages/${roomId}`, {
+    await fetch(`${host}/messages/${roomId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -95,7 +96,19 @@ function UserMessage(params: UserMessageParams) {
   );
 }
 
+function resolveServerPort(serverName: string): string {
+  switch (serverName) {
+    case "gaia":
+      return "9080";
+    case "mana":
+      return "10080";
+    default:
+      return "8080";
+  }
+}
+
 interface Params {
+  server: string;
   roomId: string;
   username: string;
 }
